@@ -58,9 +58,7 @@ class Search extends Component {
   }
 
   componentDidMount() {
-    // this.callApi()
-    //   .then(res => this.setState({ photos: res.data }))
-    //   .catch(err => console.log(err));
+  
   }
   render() {
     console.log(this.state.photos)
