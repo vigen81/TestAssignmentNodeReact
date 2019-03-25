@@ -17,8 +17,7 @@ app.post('/api/search', (req, res) => {
     //console.log(result.data.response)
     res.send({ data: result.data.response });
   })
-  .catch(err => console.log(`Error aaaaa ${err}`))
-  
+  .catch(err => console.log(`Error ${err}`))
 });
 
 if (process.env.NODE_ENV === 'production') {
