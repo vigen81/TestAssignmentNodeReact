@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import SearchItem from "./SearchItem";
+import "../AutoCompleteText.css"
 
 class Search extends Component {
   state = {
@@ -11,8 +12,8 @@ class Search extends Component {
 
   handleSubmit = async e => {
     this.state.auto.push(this.state.search);
+    this.setState({auto: [...new Set(this.state.auto)]})
     e.preventDefault();
-    console.log(this.state.search);
     const response = await fetch("/api/search", {
       method: "POST",
       headers: {
@@ -26,22 +27,39 @@ class Search extends Component {
     this.setState({ photos });
   };
 
-  onTextChanged = e => {
+  onTextChanged = async e => {
+    e.preventDefault();
+
     const value = e.target.value;
     let suggestion = [];
     if (value.length > 0) {
       const regex = new RegExp(`^${value}`, "i");
       suggestion = this.state.auto.sort().filter(v => regex.test(v));
-      console.log(" suggestion  ", suggestion);
     }
     this.setState({ suggestion: suggestion, search: value });
 
-    console.log("sugg ", this.state.suggestion);
   };
+
+  suggestionSelected = async (value) => {
+    
+    const response = await fetch("/api/search", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ q: value })
+    });
+    const body = await response.text();
+    const photos = JSON.parse(body).data;
+    this.setState(() => ({
+      search: value,
+      suggestion: [],
+      photos
+    }));
+  }
 
   renderSuggestions() {
     const { suggestion } = this.state;
-    console.log("renderSuggestion", this.state.suggestion);
     if (suggestion.length === 0) {
       return null;
     }
@@ -49,30 +67,29 @@ class Search extends Component {
     return (
       <ul>
         {suggestion.map(item => (
-          <li>{item}</li>
+          <li onClick={() => this.suggestionSelected(item)}>{item}</li>
         ))}
       </ul>
     );
   }
 
   render() {
+    const {search} = this.state;
     return (
       <div className="search">
-        <h1>Search</h1>
         <form onSubmit={this.handleSubmit}>
           <p>
             <strong>Search photos:</strong>
           </p>
-          <input
-            type="text"
-            value={this.state.search}
-            onChange={this.onTextChanged}
-          />
-          <button type="submit">Submit</button>
+          <div className="AutoComleteText">
+            <input
+              type="text"
+              value={search}
+              onChange={this.onTextChanged}
+            />
+          </div>
         </form>
-
         {this.renderSuggestions()}
-
         <div className="itemsList">
           {this.state.photos.map(photo => (
             <SearchItem key={photo.id} photo={photo} />
