@@ -11,10 +11,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // API calls
 app.post('/api/search', (req, res) => {
-  console.log(req.body)
+  //TODO: make some validation and save in the database 
   axios.get(`http://api.picsart.com/photos/search.json?q=${req.body.q}&limit=20`)
   .then(result => {
-    //console.log(result.data.response)
     res.send({ data: result.data.response });
   })
   .catch(err => console.log(`Error ${err}`))
