@@ -12,7 +12,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // API calls
 app.post('/api/search', (req, res) => {
   //TODO: make some validation and save in the database 
-  axios.get(`http://api.picsart.com/photos/search.json?q=${req.body.q}&limit=20`)
+  axios.get(`http://api.picsart.com/photos/search.json?q=${req.body.q}&limit=10`)
   .then(result => {
     res.send({ data: result.data.response });
   })
