@@ -1,69 +1,63 @@
-import React, { Component } from 'react';
-import SearchItem from './SearchItem';
+import React, { Component } from "react";
+import SearchItem from "./SearchItem";
 
 class Search extends Component {
   state = {
     photos: [],
-    search: '',
+    search: "",
     auto: [],
     suggestion: []
-  }
+  };
 
   handleSubmit = async e => {
-
     this.state.auto.push(this.state.search);
     e.preventDefault();
     console.log(this.state.search);
-    const response = await fetch('/api/search', {
-      method: 'POST',
+    const response = await fetch("/api/search", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify({ q: this.state.search }),
+      body: JSON.stringify({ q: this.state.search })
     });
     const body = await response.text();
     const photos = JSON.parse(body).data;
 
     this.setState({ photos });
-    
   };
 
-  onTextChanged = (e) => {
-    console.log('auto ', this.state.auto)
-    
+  onTextChanged = e => {
     const value = e.target.value;
     let suggestion = [];
     if (value.length > 0) {
-      const regex = new RegExp(`^${value}`, 'i');
-      suggestion = this.state.auto.sort().filter(v => regex.test(v));  
-      console.log(' suggestion  ',suggestion)
+      const regex = new RegExp(`^${value}`, "i");
+      suggestion = this.state.auto.sort().filter(v => regex.test(v));
+      console.log(" suggestion  ", suggestion);
     }
-    this.setState({suggestion: suggestion, search: value});
+    this.setState({ suggestion: suggestion, search: value });
 
-    console.log('sugg ', this.state.suggestion)
-  }
+    console.log("sugg ", this.state.suggestion);
+  };
 
-  renderSuggestions () {
-    const {suggestion} = this.state;
-    console.log('renderSuggestion', this.state.suggestion)
+  renderSuggestions() {
+    const { suggestion } = this.state;
+    console.log("renderSuggestion", this.state.suggestion);
     if (suggestion.length === 0) {
       return null;
-    }  
+    }
 
     return (
       <ul>
-          {suggestion.map((item) => <li>{item}</li>)}
-      </ul> 
-    )
+        {suggestion.map(item => (
+          <li>{item}</li>
+        ))}
+      </ul>
+    );
   }
 
-  componentDidMount() {
-  
-  }
   render() {
-    console.log(this.state.photos)
     return (
-      <div className='search'>
+      <div className="search">
         <h1>Search</h1>
         <form onSubmit={this.handleSubmit}>
           <p>
@@ -79,13 +73,13 @@ class Search extends Component {
 
         {this.renderSuggestions()}
 
-        <div className='itemsList'>
-            {this.state.photos.map(photo => (
-              <SearchItem key={photo.id} photo={photo}/>
-            ))}
+        <div className="itemsList">
+          {this.state.photos.map(photo => (
+            <SearchItem key={photo.id} photo={photo} />
+          ))}
         </div>
       </div>
-    )
+    );
   }
 }
 
