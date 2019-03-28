@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import SearchItem from "./SearchItem";
-import "../AutoCompleteText.css"
+import "../AutoCompleteText.css";
+import { withRouter } from "react-router-dom";
 
 class Search extends Component {
   state = {
@@ -11,21 +12,40 @@ class Search extends Component {
   };
 
   handleSubmit = async e => {
+    e.preventDefault();
+    const { history } = this.props;
+    history.push({pathname: '/search', search:`?q=${this.state.search}`})
     this.state.auto.push(this.state.search);
     this.setState({auto: [...new Set(this.state.auto)]})
-    e.preventDefault();
+    
+    const photos = await this.getPhotos(this.state.search);
+
+    this.setState({ photos });
+  };
+
+  async getPhotos(query) {
     const response = await fetch("/api/search", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ q: this.state.search })
+      body: JSON.stringify({ q: query })
     });
     const body = await response.text();
     const photos = JSON.parse(body).data;
+    return photos;
+  }
 
-    this.setState({ photos });
-  };
+
+  async componentDidMount () {
+    const {search} = this.props.location;
+
+    if (search) {
+      const q =  search.split('q=')[1];
+      const photos = await this.getPhotos(q);
+      this.setState({ photos, search: q });
+    }
+  }
 
   onTextChanged = async e => {
     e.preventDefault();
@@ -41,16 +61,10 @@ class Search extends Component {
   };
 
   suggestionSelected = async (value) => {
+    const { history } = this.props;
+    history.push({pathname: '/search', search:`?q=${value}`})
     
-    const response = await fetch("/api/search", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ q: value })
-    });
-    const body = await response.text();
-    const photos = JSON.parse(body).data;
+    const photos = await this.getPhotos(value);
     this.setState(() => ({
       search: value,
       suggestion: [],
@@ -67,7 +81,7 @@ class Search extends Component {
     return (
       <ul>
         {suggestion.map(item => (
-          <li onClick={() => this.suggestionSelected(item)}>{item}</li>
+          <li onClick={() => this.suggestionSelected(item)} key={item}>{item}</li>
         ))}
       </ul>
     );
@@ -100,4 +114,4 @@ class Search extends Component {
   }
 }
 
-export default Search;
+export default withRouter(Search);
